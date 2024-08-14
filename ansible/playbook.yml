@@ -1,0 +1,6 @@
+---
+- name: Teste de Conectividade com a Máquina Remota
+  hosts: debian
+  tasks:
+    - name: Executando ping na máquina remota
+      ansible.builtin.ping:
