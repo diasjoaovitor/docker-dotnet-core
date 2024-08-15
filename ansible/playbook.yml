@@ -1,6 +1,47 @@
 ---
-- name: Teste de Conectividade com a Máquina Remota
+- name: Configures the Debian machine
   hosts: debian
+  become: true
   tasks:
-    - name: Executando ping na máquina remota
-      ansible.builtin.ping:
+    - name: updates the apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install the required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Installs GnuPG (gpg)
+      apt:
+        name: gnupg
+        state: present
+
+    - name: Adds the GPG key of the Docker repository
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: Adds the Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+        state: present
+
+    - name: Updates the apt cache after adding the Docker repository
+      apt:
+        update_cache: yes
+
+    - name: Installs Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Installs Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
